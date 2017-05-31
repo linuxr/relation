@@ -16,7 +16,8 @@ defmodule Relation.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
-    [extra_applications: [:logger]]
+    [mod: {Relation, []},
+     applications: [:logger, :phoenix_ecto]]
   end
 
   # Dependencies can be Hex packages:
@@ -29,6 +30,7 @@ defmodule Relation.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:ex_doc, "~> 0.14", only: :dev, runtime: false}]
+    [{:phoenix_ecto, "~> 3.0"},
+     {:ex_doc, "~> 0.14", only: :dev, runtime: false}]
   end
 end
