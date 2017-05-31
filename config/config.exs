@@ -10,7 +10,7 @@ use Mix.Config
 
 # You can configure for your application as:
 #
-#     config :relation, key: :value
+config :relation, author: "iotalab", email: "linuxr@aliyun.com"
 #
 # And access this configuration in your application as:
 #

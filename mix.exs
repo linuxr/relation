@@ -3,6 +3,7 @@ defmodule Relation.Mixfile do
 
   def project do
     [app: :relation,
+     discription: "common relation operations for Relational database",
      version: "0.1.0",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
@@ -28,6 +29,6 @@ defmodule Relation.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [{:ex_doc, "~> 0.14", only: :dev, runtime: false}]
   end
 end
