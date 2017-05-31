@@ -3,11 +3,12 @@ defmodule Relation.Mixfile do
 
   def project do
     [app: :relation,
-     discription: "common relation operations for Relational database",
      version: "0.1.0",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: "common relation operations for Relational database",
+     package: package(),
      deps: deps()]
   end
 
@@ -32,5 +33,13 @@ defmodule Relation.Mixfile do
   defp deps do
     [{:phoenix_ecto, "~> 3.0"},
      {:ex_doc, "~> 0.14", only: :dev, runtime: false}]
+  end
+
+  defp package do
+    [
+      maintainers: [" wangyubin ", " chenminghua "],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/linuxr/relation"}
+    ]
   end
 end
