@@ -31,7 +31,7 @@ defmodule Mix.Gen.Phoenix do
           :eex  -> EEx.eval_file(source, binding)
         end
 
-      Mix.Generator.create_file(target, contents)
+      Mix.Generator.create_file(target, contentsm, force: true)
     end
   end
 
