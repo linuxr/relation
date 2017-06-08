@@ -1,4 +1,4 @@
-defmodule Gen.Phoenix do
+defmodule Mix.Phoenix do
   # Conveniences for Phoenix tasks.
   @moduledoc false
 
