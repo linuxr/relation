@@ -4,7 +4,6 @@ defmodule Relation do
   You could build rest api base on it.
   """
   alias Ecto.Multi
-  alias Building.Repo
   import Ecto.Query
 
   require Logger
