@@ -5,44 +5,9 @@ defmodule Relation do
   """
   alias Ecto.Multi
   import Ecto.Query
+  use Relation.DynamicRepo
 
   require Logger
-
-  @doc """
-  Under score.
-
-  """
-  defp underscore(model_str), do: Macro.underscore(model_str)
-
-  @doc """
-  Convert relations.
-
-  """
-  defp convert_relations(relations) do
-    relations
-    |> Enum.map(&convert_model/1)
-  end
-
-  defp convert_model(params) when is_map(params) do
-    params
-    |> update_model("model", &underscore/1)
-    |> update_model("from_model", &underscore/1)
-    |> update_model("to_model", &underscore/1)
-    |> update_model("relations", &convert_relations/1)
-  end
-
-  defp convert_model(params) when is_binary(params) do
-    underscore(params)
-  end
-
-  defp convert_model(params), do: params
-
-  defp update_model(params, key, convert_fn) do
-    case Map.pop(params, key) do
-      {nil, params} -> params
-      {val, params} -> Map.put(params, key, convert_fn.(val))
-    end
-  end
 
   @doc """
   Dispatch action.
@@ -69,8 +34,40 @@ defmodule Relation do
     end
   end
 
+  defp underscore(model_str), do: Macro.underscore(model_str)
+
+  defp convert_relations(relations) do
+    relations
+    |> Enum.map(&convert_model/1)
+  end
+
+  defp convert_model(params) when is_map(params) do
+    params
+    |> update_model("model", &underscore/1)
+    |> update_model("from_model", &underscore/1)
+    |> update_model("to_model", &underscore/1)
+    |> update_model("relations", &convert_relations/1)
+  end
+
+  defp convert_model(params) when is_binary(params) do
+    underscore(params)
+  end
+
+  defp convert_model(params), do: params
+
+  defp update_model(params, key, convert_fn) do
+    case Map.pop(params, key) do
+      {nil, params} -> params
+      {val, params} -> Map.put(params, key, convert_fn.(val))
+    end
+  end
+
+  defp atom(str), do: String.to_atom(str)
+  defp str_to_model(str), do: Module.concat(Building, Macro.camelize(str))
+
+
   # create
-  def create(params) do
+  defp create(params) do
     Multi.new()
     |> Multi.run(:result, fn _ ->
         params
@@ -87,10 +84,7 @@ defmodule Relation do
       end
   end
 
-  defp atom(str), do: String.to_atom(str)
-  defp str_to_model(str), do: Module.concat(Building, Macro.camelize(str))
-
-  def create_model(params = %{"model" => model_str, "id" => id}) do
+  defp create_model(params = %{"model" => model_str, "id" => id}) do
     model = str_to_model(model_str)
     view = str_to_model("#{model_str}_view")
 
@@ -100,7 +94,7 @@ defmodule Relation do
   end
 
 
-  def create_model(params = %{"model" => model_str, "param" => param}) do
+  defp create_model(params = %{"model" => model_str, "param" => param}) do
     model = str_to_model(model_str)
     view = str_to_model("#{model_str}_view")
 
@@ -114,7 +108,7 @@ defmodule Relation do
     {record, params}
   end
 
-  def create_relations({record, params = %{"model" => model}}) do
+  defp create_relations({record, params = %{"model" => model}}) do
     params
     |> Map.get("relations", [])
     |> Enum.map(fn
@@ -193,7 +187,7 @@ defmodule Relation do
       end
   end
 
-  def delete(%{"model" => model_str, "id" => id}) do
+  defp delete(%{"model" => model_str, "id" => id}) do
     model = str_to_model(model_str)
     view = str_to_model("#{model_str}_view")
 
@@ -206,7 +200,7 @@ defmodule Relation do
     {:ok, data}
   end
 
-  def delete(%{"to_model" => to_model_str, "from_model" => from_model_str, "to_id" => to_id, "from_id" => from_id}) do
+  defp delete(%{"to_model" => to_model_str, "from_model" => from_model_str, "to_id" => to_id, "from_id" => from_id}) do
     relation_model = str_to_model("#{from_model_str}_to_#{to_model_str}")
     to_id_key = atom("#{to_model_str}_id")
     from_id_key = atom("#{from_model_str}_id")
@@ -216,7 +210,7 @@ defmodule Relation do
     {:ok, %{status: "success"}}
   end
 
-  def update(req = %{"model" => model_str, "param" => param, "id" => id}) do
+  defp update(req = %{"model" => model_str, "param" => param, "id" => id}) do
     model = str_to_model(model_str)
     view = str_to_model("#{model_str}_view")
     relations = Map.get(req, "relations", [])
@@ -305,7 +299,7 @@ defmodule Relation do
     {"#{to_model_str}s", tos}
   end
 
-  def query(%{"model" => model_str, "id" => id, "relations" => relations}) do
+  defp query(%{"model" => model_str, "id" => id, "relations" => relations}) do
     model = str_to_model(model_str)
 
     preloads =
@@ -331,7 +325,7 @@ defmodule Relation do
     {:ok, result}
   end
 
-  def query(%{"model" => model_str, "page" => page, "count" => count, "relations" => relations}) do
+  defp query(%{"model" => model_str, "page" => page, "count" => count, "relations" => relations}) do
     limit = count
     offset = (page - 1) * count
 
@@ -369,7 +363,7 @@ defmodule Relation do
     {:ok, result, info}
   end
 
-  def query(%{"model" => model_str, "relations" => relations}) do
+  defp query(%{"model" => model_str, "relations" => relations}) do
     query(%{"model" => model_str, "page" => 1, "count" => 20, "relations" => relations})
   end
 end

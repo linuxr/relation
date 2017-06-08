@@ -32,6 +32,7 @@ defmodule Relation.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:phoenix_ecto, "~> 3.0"},
+     {:phoenix, "~> 1.2"},
      {:ex_doc, "~> 0.14", only: :dev, runtime: false}]
   end
 
