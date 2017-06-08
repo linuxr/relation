@@ -50,7 +50,7 @@ defmodule Mix.Tasks.Gen.Json do
       # {:eex, "controller_test.exs", "test/controllers/#{path}_controller_test.exs"},
     ] ++ changeset_view()
 
-    Mix.Phoenix.copy_from paths(), "priv/templates/gen.json", "", binding, files
+    Mix.Gen.Phoenix.copy_from paths(), "priv/templates/gen.json", "", binding, files
 
     instructions = """
 

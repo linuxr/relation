@@ -137,7 +137,7 @@ defmodule Mix.Tasks.Gen.Model do
       {:eex, "model.ex",       "web/models/#{path}.ex"},
     ] ++ migration(opts[:migration], path)
 
-    Mix.Phoenix.copy_from paths(), "priv/templates/gen.model", "", binding, files
+    Mix.Gen.Phoenix.copy_from paths(), "priv/templates/gen.model", "", binding, files
 
     # Print any extra instruction given by parent generators
     Mix.shell.info opts[:instructions] || ""
