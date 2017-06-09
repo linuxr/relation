@@ -63,7 +63,7 @@ defmodule Relation do
   end
 
   defp atom(str), do: String.to_atom(str)
-  defp str_to_model(str), do: Module.concat(Building, Macro.camelize(str))
+  defp str_to_model(str), do: Module.concat(Application.get_env(:relation, :app), Macro.camelize(str))
 
 
   # create
