@@ -108,6 +108,6 @@ defmodule Mix.Tasks.Gen.Json do
   end
 
   defp paths do
-    [".", :phoenix]
+    [".", :relation]
   end
 end

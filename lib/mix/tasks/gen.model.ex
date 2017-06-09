@@ -260,6 +260,6 @@ defmodule Mix.Tasks.Gen.Model do
   end
 
   defp paths do
-    [".", :phoenix]
+    [".", :relation]
   end
 end
