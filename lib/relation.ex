@@ -325,6 +325,10 @@ defmodule Relation do
     {:ok, result}
   end
 
+  defp query(%{"model" => model_str, "relations" => relations}) do
+    query(%{"model" => model_str, "page" => 1, "count" => 20, "relations" => relations})
+  end
+
   defp query(%{"model" => model_str, "page" => page, "count" => count, "relations" => relations}) do
     limit = count
     offset = (page - 1) * count
@@ -363,7 +367,4 @@ defmodule Relation do
     {:ok, result, info}
   end
 
-  defp query(%{"model" => model_str, "relations" => relations}) do
-    query(%{"model" => model_str, "page" => 1, "count" => 20, "relations" => relations})
-  end
 end
