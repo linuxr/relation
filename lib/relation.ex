@@ -325,11 +325,10 @@ defmodule Relation do
     {:ok, result}
   end
 
-  defp query(%{"model" => model_str, "relations" => relations}) do
-    query(%{"model" => model_str, "page" => 1, "count" => 20, "relations" => relations})
-  end
-
-  defp query(%{"model" => model_str, "page" => page, "count" => count, "relations" => relations}) do
+  # =======================================
+  # orders sample: [%{"desc" => "field1"}, %{"asc" => "field2"}]
+  # filters sample: [%{"op" => "like", "field" => "field1", "val" => "string or int or float"}]
+  defp query(%{"model" => model_str, "page" => page, "count" => count, "orders" => orders, "filters" => filters, "relations" => relations}) do
     limit = count
     offset = (page - 1) * count
 
@@ -339,8 +338,30 @@ defmodule Relation do
       relations
       |> Enum.map(&atom("#{&1}s"))
 
+    # order_by
+    orders =
+      Enum.reduce(orders, [], fn(x, acc) -> case x do
+                                                     %{"desc" => v} -> acc ++ [desc: atom(v)]
+                                                     %{"asc" => v} -> acc ++ [asc: atom(v)]
+                                                     _ -> acc
+                                                   end
+      end)
+
+    query = (from m in model, limit: ^limit, offset: ^offset, order_by: ^orders, preload: ^preloads, select: m)
+
+    # filters
+    query =
+      Enum.reduce(filters, query, fn(x, acc) -> case x do
+                                                  %{"op" => "like", "field" => f, "val" => v} ->
+                                                    f = atom(f)
+                                                    v = "%#{v}%"
+                                                    where(acc, [m], like(field(m, ^f), ^v))
+                                                  _ -> acc
+                                                end
+      end)
+
     records =
-    (from m in model, limit: ^limit, offset: ^offset, preload: ^preloads, select: m)
+    query
     |> Repo.all()
 
     total =
@@ -363,8 +384,23 @@ defmodule Relation do
       |> Enum.into(obj)
     end)
 
-    info = %{"page" => page, "count" => length(result), "total" => total}
-    {:ok, result, info}
+      info = %{"page" => page, "count" => length(result), "total" => total}
+      {:ok, result, info}
   end
 
+  defp query(%{"model" => model_str, "page" => page, "count" => count, "orders" => orders, "relations" => relations}) do
+    query(%{"model" => model_str, "page" => page, "count" => count, "orders" => orders, "filters" => [], "relations" => relations})
+  end
+
+  defp query(%{"model" => model_str, "page" => page, "count" => count, "filters" => filters, "relations" => relations}) do
+    query(%{"model" => model_str, "page" => page, "count" => count, "orders" => [], "filters" => filters, "relations" => relations})
+  end
+
+  defp query(%{"model" => model_str, "page" => page, "count" => count, "relations" => relations}) do
+    query(%{"model" => model_str, "page" => page, "count" => count, "orders" => [], "filters" => [], "relations" => relations})
+  end
+
+  defp query(%{"model" => model_str, "relations" => relations}) do
+    query(%{"model" => model_str, "page" => 1, "count" => 20, "relations" => relations})
+  end
 end
