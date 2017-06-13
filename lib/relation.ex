@@ -400,6 +400,14 @@ defmodule Relation do
     query(%{"model" => model_str, "page" => page, "count" => count, "orders" => [], "filters" => [], "relations" => relations})
   end
 
+  defp query(%{"model" => model_str, "orders" => orders, "relations" => relations}) do
+    query(%{"model" => model_str, "page" => 1, "count" => 20, "orders" => orders, "filters" => [], "relations" => relations})
+  end
+
+  defp query(%{"model" => model_str, "filters" => filters, "relations" => relations}) do
+    query(%{"model" => model_str, "page" => 1, "count" => 20, "orders" => [], "filters" => filters, "relations" => relations})
+  end
+
   defp query(%{"model" => model_str, "relations" => relations}) do
     query(%{"model" => model_str, "page" => 1, "count" => 20, "relations" => relations})
   end
