@@ -261,6 +261,23 @@ defmodule Relation do
       end
   end
 
+  defp update_relation(%{:id => from_id}, from_model_str, %{"action" => "update", "to_model" => to_model_str, "to_id" => to_id, "to_param" => to_param}) do
+    to_model = str_to_model(to_model_str)
+    view = str_to_model("#{to_model_str}_view")
+
+    record = Repo.get!(to_model, to_id)
+
+    record
+    |> to_model.changeset(to_param)
+    |> Repo.update()
+    |> case do
+         {:ok, record} ->
+           record = view.render("#{to_model_str}.json", %{atom(to_model_str) => record})
+           {"#{to_model_str}s", [record]}
+         _ -> {:error, "更新失败"}
+       end
+  end
+
   defp update_relation(%{:id => from_id}, from_model_str, %{"action" => "replace", "to_model" => to_model_str, "to_id" => to_id}) do
     relation_model = str_to_model("#{from_model_str}_to_#{to_model_str}")
 
