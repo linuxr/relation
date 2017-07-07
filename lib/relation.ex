@@ -241,9 +241,6 @@ defmodule Relation do
             {:ok, record} ->
               record = view.render("#{model_str}.json", %{atom(model_str) => record})
 
-              IO.inspect(relations)
-              IO.inspect(record)
-              IO.inspect(model_str)
               relations
               |> Enum.map(&update_relation(record, model_str, &1))
               |> Enum.into(record)
@@ -276,6 +273,26 @@ defmodule Relation do
            {"#{to_model_str}s", [record]}
          _ -> {:error, "更新失败"}
        end
+  end
+
+
+  defp update_relation(%{:id => from_id}, from_model_str, %{"action" => "replace", "to_model" => to_model_str, "to_ids" => to_ids}) do
+    relation_model = str_to_model("#{from_model_str}_to_#{to_model_str}")
+
+    where = [{atom("#{from_model_str}_id"), from_id}]
+    query = (from m in relation_model, where: ^where)
+    Repo.delete_all(query)
+
+    create_param = %{
+      "model" => from_model_str,
+      "id" => from_id,
+      "relations" => [%{"to_model" => to_model_str, "to_ids" => to_ids}]
+    }
+
+    {:ok, result} = create(create_param)
+    tos = Map.fetch!(result, "#{to_model_str}s")
+
+    {"#{to_model_str}s", tos}
   end
 
   defp update_relation(%{:id => from_id}, from_model_str, %{"action" => "replace", "to_model" => to_model_str, "to_id" => to_id}) do
