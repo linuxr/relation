@@ -258,6 +258,30 @@ defmodule Relation do
       end
   end
 
+  defp update(req = %{"model" => model_str, "id" => id}) do
+    model = str_to_model(model_str)
+    view = str_to_model("#{model_str}_view")
+    relations = Map.get(req, "relations", [])
+
+    Multi.new()
+    |> Multi.run(:result, fn _ ->
+      record = Repo.get!(model, id)
+      record = view.render("#{model_str}.json", %{atom(model_str) => record})
+
+      relations
+      |> Enum.map(&update_relation(record, model_str, &1))
+      |> Enum.into(record)
+      |> case do
+           record -> {:ok, record}
+         end
+    end)
+    |> Repo.transaction()
+    |> case do
+        {:ok, result} -> {:ok, result.result}
+        _ -> {:error, "更新失败"}
+      end
+  end
+
   defp update_relation(%{:id => from_id}, from_model_str, %{"action" => "update", "to_model" => to_model_str, "to_id" => to_id, "to_param" => to_param}) do
     to_model = str_to_model(to_model_str)
     view = str_to_model("#{to_model_str}_view")
